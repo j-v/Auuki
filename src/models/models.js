@@ -431,7 +431,8 @@ class Weight extends Model {
         const storageModel = {
             key: self.prop,
             fallback: self.defaultValue(),
-            parse: parseInt,
+            // accept decimal weights from APIs (e.g. 72.5 kg)
+            parse: parseFloat,
         };
         self.min = existance(args.min, 0);
         self.max = existance(args.max, 500);
@@ -440,7 +441,8 @@ class Weight extends Model {
     defaultValue() { return 75; }
     defaultIsValid(value) {
         const self = this;
-        return Number.isInteger(value) && inRange(self.min, self.max, value);
+        // allow numeric weights including decimals
+        return Number.isFinite(value) && inRange(self.min, self.max, value);
     }
 }
 
