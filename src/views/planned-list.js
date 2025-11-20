@@ -48,9 +48,9 @@ class PlannedList extends HTMLElement {
             return;
         }
         if(action === ':intervals:wod') {
+            this.onLoading(this.$indicatorIntervals);
             this.model.wod('intervals');
             this.model.getAthlete('intervals');
-            this.onLoading(this.$indicatorIntervals);
             return;
         }
         if(action === ':intervals:wod:success') {

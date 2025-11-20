@@ -2,6 +2,9 @@ import { xf, once, print, exists, } from '../functions.js';
 import { isoDate, } from '../utils.js';
 import { OAuthService, DialogMsg, stateParam, } from './enums.js';
 import config from './config.js';
+import { LocalStorageItem } from '../storage/local-storage.js';
+
+const intervals_base_uri = 'https://intervals.icu/api/v1';
 
 function Intervals(args = {}) {
     const serviceName = OAuthService.intervals;
@@ -12,6 +15,22 @@ function Intervals(args = {}) {
     const update = function() {
         intervals_client_id = config.get().INTERVALS_CLIENT_ID;
     };
+
+    // Local storage wrapper for developer key (used by the dev-key flow)
+    const devKeyStorage = LocalStorageItem({ key: 'intervals.dev.key', fallback: '' });
+
+    // Build Basic auth header: username is literally "API_KEY" and password is the key
+    function buildDevKeyAuthHeader(devKey) {
+        let authHeader = '';
+        try {
+            const token = `API_KEY:${devKey}`;
+            // btoa is available in browser; fallback to window.atob inverse if needed
+            authHeader = 'Basic ' + (typeof btoa === 'function' ? btoa(token) : Buffer.from(token).toString('base64'));
+        } catch (e) {
+            console.warn('Unable to create Basic auth header for intervals dev key', e);
+        }
+        return authHeader;
+    }
 
     // Step D
     async function connect() {
@@ -94,6 +113,7 @@ function Intervals(args = {}) {
     }
 
     async function uploadWorkout(record) {
+        // TODO implement dev key version
         const blob = record.blob;
         const workoutName = record.summary?.name ?? 'Powered by Auuki workout';
         const url = `${api_uri}/api/intervals/upload`;
@@ -129,6 +149,10 @@ function Intervals(args = {}) {
     async function wod() {
         const oldest = isoDate();
         const newest = isoDate();
+        // If developer key flow is enabled (config), fetch directly from intervals.icu API
+        if(config.get().BACKEND_DISABLED) {
+            return await wodDev({oldest, newest});
+        }
 
         const url = `${api_uri}/api/intervals/events` +
               '?' +
@@ -161,6 +185,95 @@ function Intervals(args = {}) {
         } catch(error) {
             xf.dispatch('action:planned', ':intervals:wod:fail');
             console.log(error);
+            return [];
+        }
+    }
+
+    // Developer-key based fetch directly to intervals.icu
+    async function wodDev(args = {}) {
+        const oldest = args.oldest ?? isoDate();
+        const newest = args.newest ?? isoDate();
+        // allow dev key to be provided via LocalStorageItem 
+        const devKey = devKeyStorage.get()
+
+        if(!devKey) {
+            console.warn('intervals.wodDev: no developer key found (config or localStorage)');
+            xf.dispatch('action:planned', ':intervals:wod:fail');
+            return [];
+        }
+
+        // Use athlete id 0 to refer to the API key owner: GET /api/v1/athlete/0/events
+        const base = `${intervals_base_uri}/athlete/0/events`;
+        const url = base + '?' + new URLSearchParams({oldest, newest}).toString();
+
+        let authHeader = buildDevKeyAuthHeader(devKey);
+
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': authHeader,
+                    'Accept': 'application/json',
+                },
+            });
+
+            if(response.ok) {
+                const data = await response.json();
+                xf.dispatch('action:planned', ':intervals:wod:success');
+                console.log(':intervals:wod:dev', data);
+
+                // For events that don't include workout_file_base64, try to
+                // download the workout file from intervals.icu (ZWO/MRC/ERG)
+                // using the developer key and attach it as base64.
+                const apiBase = 'https://intervals.icu/api/v1';
+
+                await Promise.all(data.map(async (item) => {
+                    try {
+                        if(!exists(item.workout_file_base64) && exists(item.id)) {
+                            // Download as ZWO by event id: /athlete/0/events/{id}/download.zwo
+                            const downloadUrl = `${apiBase}/athlete/0/events/${item.id}/download.zwo`;
+                            const dlResp = await fetch(downloadUrl, {
+                                method: 'GET',
+                                headers: {
+                                    'Authorization': authHeader,
+                                    'Accept': 'application/xml, text/xml, */*',
+                                },
+                            });
+
+                            if(dlResp.ok) {
+                                const text = await dlResp.text();
+                                // convert to base64 (handle unicode safely)
+                                let base64;
+                                try {
+                                    base64 = (typeof btoa === 'function')
+                                        ? btoa(unescape(encodeURIComponent(text)))
+                                        : Buffer.from(text, 'utf8').toString('base64');
+                                } catch (e) {
+                                    base64 = Buffer.from(text, 'utf8').toString('base64');
+                                }
+                                item.workout_file_base64 = base64;
+                                // set a sensible filename if missing
+                                if(!exists(item.workout_filename)) {
+                                    item.workout_filename = `Intervals_${item.id}.zwo`;
+                                }
+                            } else {
+                                console.warn('wodDev: failed to download workout', item.id, dlResp.status);
+                            }
+                        }
+                    } catch (e) {
+                        console.error('wodDev: error downloading workout', item.id, e);
+                    }
+                }));
+
+                return data.filter((item) => exists(item.workout_file_base64));
+            } else {
+                xf.dispatch('action:planned', ':intervals:wod:fail');
+                console.warn('intervals.wodDev failed', response.status);
+                return [];
+            }
+        } catch (e) {
+            xf.dispatch('action:planned', ':intervals:wod:fail');
+            console.error('intervals.wodDev error', e);
             return [];
         }
     }
@@ -228,6 +341,11 @@ function Intervals(args = {}) {
     }
 
     async function getAthlete() {
+        // If developer key flow enabled, fetch athlete directly from intervals.icu
+        if(config.get().BACKEND_DISABLED) {
+            return await getAthleteDev();
+        }
+
         // GET /api/v1/athlete/{id}
         //
         // Weight is icu_weight (in kg).
@@ -269,6 +387,50 @@ function Intervals(args = {}) {
                 return athleteToSettings();
             }
         } catch(error) {
+            xf.dispatch('action:athlete', ':intervals:athlete:fail');
+            console.log(error);
+            return athleteToSettings();
+        }
+    }
+
+    // Developer-key based getAthlete
+    async function getAthleteDev() {
+        // Use athlete id 0 to refer to the API key owner
+        const devKey = devKeyStorage.get()
+        const url = `${intervals_base_uri}/athlete/0`;
+
+        if(!devKey) {
+            console.warn('intervals.getAthleteDev: no developer key found (config or localStorage)');
+            xf.dispatch('action:athlete', ':intervals:athlete:fail');
+            return athleteToSettings();
+        }
+
+        let authHeader = buildDevKeyAuthHeader(devKey);
+
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': authHeader,
+                    'Accept': 'application/json',
+                },
+            });
+
+            if(response.ok) {
+                const data = await response.json();
+                xf.dispatch('action:athlete', ':intervals:athlete:success');
+                console.log(':intervals:getAthlete:dev', data);
+                return athleteToSettings(data);
+            } else {
+                xf.dispatch('action:athlete', ':intervals:athlete:fail');
+                if(response.status === 403) {
+                    console.log(`:api :no-auth`);
+                    xf.dispatch('action:auth', ':password:login');
+                    xf.dispatch('ui:modal:error:open', DialogMsg.noAuth);
+                }
+                return athleteToSettings();
+            }
+        } catch (error) {
             xf.dispatch('action:athlete', ':intervals:athlete:fail');
             console.log(error);
             return athleteToSettings();

@@ -18,7 +18,7 @@ function Auth(args = {}) {
     let _expired = true;
 
     function loadTurnstile() {
-        if(!_loggedIn && _hasApi && !_turnstileLoaded) {
+        if(!config.get().BACKEND_DISABLED && !_loggedIn && _hasApi && !_turnstileLoaded) {
             console.log(`:turnstile :load`);
 
             const script = document.createElement('script');

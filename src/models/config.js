@@ -10,6 +10,8 @@ class Config {
             // API_URI: "http://localhost:8080",
             PWA_URI: window.location.origin ?? "https://auuki.com",
             API_URI: "https://api.auuki.com",
+            // Disable calls to the Auuki backend entirely in favor of using intervals dev key API
+            BACKEND_DISABLED: true,
             STRAVA_CLIENT_ID: this.defaultStravaClientId,
             INTERVALS_CLIENT_ID: this.defaultIntervalsClientId,
             TRAINING_PEAKS_CLIENT_ID: this.defaultTrainingPeaksClientId,

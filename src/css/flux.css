@@ -2422,6 +2422,9 @@ battery-level {
     #auth-error--section.active {
         display: block;
     }
+    #dev-mode--forms {
+        display: none;
+    }
     .error {
         font-size: 1.2em;
         margin: 1em auto;

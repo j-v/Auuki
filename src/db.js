@@ -1,5 +1,6 @@
 import { xf, exists, equals } from './functions.js';
 import { models } from './models/models.js';
+import config from './models/config.js';
 import { Sound } from './sound.js';
 import { idb } from './storage/idb.js';
 import { ControlMode, } from './ble/enums.js';
@@ -441,7 +442,11 @@ xf.reg('app:start', async function(_, db) {
     const sound = Sound({volume: db.volume});
     sound.start();
 
-    models.api.start();
+    if(!config.get().BACKEND_DISABLED) {
+        models.api.start();
+    } else {
+        console.log(':api :disabled :skipping api.start');
+    }
     // TODO: remove
     // xf.dispatch(`ui:page-set`, 'workouts');
 

@@ -1,5 +1,7 @@
 import { xf, empty, } from '../functions.js';
 import { models } from '../models/models.js';
+import config from '../models/config.js';
+import { LocalStorageItem } from '../storage/local-storage.js';
 
 // TODO: This needs refactoring to something more general with
 // declarative configuration. Something that will work for all tabs and switches.
@@ -11,6 +13,12 @@ class AuthForms extends HTMLElement {
         const self = this;
         this.abortController = new AbortController();
         this.signal = { signal: self.abortController.signal };
+
+        // If backend is disabled, hide auth forms and show dev settings instead
+        if(config.get().BACKEND_DISABLED) {
+            this.showDevMode();
+            return;
+        }
 
         this.el = {
             // each subset is exclusive or with css class .active
@@ -191,6 +199,59 @@ class AuthForms extends HTMLElement {
         }
         this.el.$error.classList.add('active');
         this.el.$pwds.forEach(($el) => $el.value = '');
+    }
+    showDevMode() {
+        // Hide password forms and error sections
+        const passwordForms = this.querySelector('#password--forms');
+        const errorSection = this.querySelector('#auth-error--section');
+        const turnstileContainer = this.querySelector('#cf-turnstile-container');
+        
+        if (passwordForms) passwordForms.style.display = 'none';
+        if (errorSection) errorSection.style.display = 'none';
+        if (turnstileContainer) turnstileContainer.style.display = 'none';
+
+        // Show dev mode forms (static HTML from index.html)
+        const devModeForms = this.querySelector('#dev-mode--forms');
+        if (devModeForms) {
+            devModeForms.style.display = 'block';
+            
+            // Wire up event handlers using LocalStorageItem pattern
+            const devKeyInput = this.querySelector('#auth-intervals-dev-key');
+            const saveBtn = this.querySelector('#auth-intervals-save-btn');
+            const clearBtn = this.querySelector('#auth-intervals-clear-btn');
+            
+            // Initialize LocalStorageItem instances
+            const devKeyStorage = new LocalStorageItem({ key: 'intervals.dev.key', fallback: '' });
+            
+            // Load current values
+            if (devKeyInput) devKeyInput.value = devKeyStorage.get();
+            
+            // Save handler
+            if (saveBtn) {
+                saveBtn.addEventListener('click', () => {
+                    const key = devKeyInput?.value || '';
+                    
+                    devKeyStorage.set(key);
+                                        
+                    console.log(':settings :intervals :saved (dev mode auth area)', { key });
+                    
+                    // Small UX feedback
+                    saveBtn.textContent = 'Saved!';
+                    setTimeout(() => saveBtn.textContent = 'Save Settings', 1200);
+                });
+            }
+            
+            // Clear handler
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    devKeyStorage.remove();
+                    
+                    if (devKeyInput) devKeyInput.value = '';
+                    
+                    console.log(':settings :intervals :cleared (dev mode auth area)');
+                });
+            }
+        }
     }
 }
 
