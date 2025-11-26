@@ -835,6 +835,26 @@ class SlopeTargetControl extends PowerTargetControl {
 customElements.define('slope-target-control', SlopeTargetControl);
 
 
+class FTPControl extends PowerTargetControl {
+    setDefaults() {
+        this.prop = 'db:ftp';
+        this.selectors = {
+            input: '#ftp-input',
+            inc:   '#ftp-inc',
+            dec:   '#ftp-dec',
+        };
+        this.effects = {
+            inc: 'ftp-inc',
+            dec: 'ftp-dec',
+            set: 'ftp-set',
+        };
+        this.parse = parseInt;
+    }
+}
+
+customElements.define('ftp-control', FTPControl);
+
+
 class PowerValue extends DataView {
     getDefaults() {
         return {
@@ -1864,6 +1884,7 @@ export {
 
     SlopeTarget,
     PowerTarget,
+    FTPControl,
 
     WorkoutName,
 

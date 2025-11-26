@@ -1209,6 +1209,33 @@ auto-start-counter {
     top: 0;
     cursor: pointer;
 }
+
+/* Dual control layout for ERG mode */
+.erg-dual-controls {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.control-with-label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex: 1;
+    gap: 0.5rem;
+}
+
+.control-label {
+    font-size: 0.9em;
+    font-weight: bold;
+    color: var(--gray);
+    text-transform: uppercase;
+    min-width: 2rem;
+    text-align: right;
+}
+
 /* END Target Controls */
 /* END Home Page */
 

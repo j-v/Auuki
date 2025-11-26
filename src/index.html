@@ -326,19 +326,40 @@
 
                                 <tab-group prop="mode">
                                     <div id="erg-mode-controls" class="tab active mode-controls" tab="erg">
-                                        <power-target-control id="power-control-btn" class="number-btn">
-                                            <div class="number-input">
-                                                <button id="power-target-dec"
-                                                        class="number-input--dec number-input--btn btn">-</button>
-                                                <input id="power-target-input"
-                                                       class="number-input--value"
-                                                       type="number"
-                                                       value="0"
-                                                       autocomplete="off"/>
-                                                <button id="power-target-inc"
-                                                        class="number-input--inc number-input--btn btn">+</button>
+                                        <div class="erg-dual-controls">
+                                            <div class="control-with-label">
+                                                <div class="control-label">W</div>
+                                                <power-target-control id="power-control-btn" class="number-btn">
+                                                    <div class="number-input">
+                                                        <button id="power-target-dec"
+                                                                class="number-input--dec number-input--btn btn">-</button>
+                                                        <input id="power-target-input"
+                                                               class="number-input--value"
+                                                               type="number"
+                                                               value="0"
+                                                               autocomplete="off"/>
+                                                        <button id="power-target-inc"
+                                                                class="number-input--inc number-input--btn btn">+</button>
+                                                    </div>
+                                                </power-target-control>
                                             </div>
-                                        </power-target-control>
+                                            <div class="control-with-label">
+                                                <div class="control-label">FTP</div>
+                                                <ftp-control id="ftp-control-btn" class="number-btn">
+                                                    <div class="number-input">
+                                                        <button id="ftp-dec"
+                                                                class="number-input--dec number-input--btn btn">-</button>
+                                                        <input id="ftp-input"
+                                                               class="number-input--value"
+                                                               type="number"
+                                                               value="0"
+                                                               autocomplete="off"/>
+                                                        <button id="ftp-inc"
+                                                                class="number-input--inc number-input--btn btn">+</button>
+                                                    </div>
+                                                </ftp-control>
+                                            </div>
+                                        </div>
                                     </div> <!-- end erg mode -->
                                     <div id="resistance-mode-controls" class="tab mode-controls" tab="resistance">
                                         <resistance-target-control id="resistance-control-btn" class="number-btn">
