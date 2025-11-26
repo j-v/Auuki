@@ -10,6 +10,8 @@ function Keyboard() {
     const isKeyS     = (code) => code === 'KeyS';
     const isKeyL     = (code) => code === 'KeyL';
     const isKeySpace = (code) => code === 'Space';
+    const isKeyEqual = (code) => code === 'Equal';
+    const isKeyMinus = (code) => code === 'Minus';
 
     window.addEventListener('keydown', onKeydown.bind(this));
 
@@ -50,6 +52,14 @@ function Keyboard() {
             e.preventDefault();
             xf.dispatch('key:space');
         }
+        if(isKeyEqual(code)) {
+            e.preventDefault();
+            xf.dispatch('key:ftp-inc');
+        }
+        if(isKeyMinus(code)) {
+            e.preventDefault();
+            xf.dispatch('key:ftp-dec');
+        }
     }
 }
 
@@ -83,6 +93,14 @@ function KeyboardControls() {
         if(mode === ControlMode.sim) {
             xf.dispatch('ui:slope-target-dec');
         }
+    });
+
+    // FTP Inc/Dec
+    xf.sub('key:ftp-inc', e => {
+        xf.dispatch('ui:ftp-inc');
+    });
+    xf.sub('key:ftp-dec', e => {
+        xf.dispatch('ui:ftp-dec');
     });
 
     // Modes
