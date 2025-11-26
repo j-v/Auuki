@@ -288,13 +288,13 @@ xf.reg('ui:ftp-set', (ftp, db) => {
 // Increment/decrement FTP (used by FTP arrow buttons)
 xf.reg('ui:ftp-inc', (_, db) => {
     const cur = db.ftp ?? models.ftp.default;
-    const next = models.ftp.set(cur + 1);
+    const next = models.ftp.set(cur + 5);
     db.ftp = next;
     models.ftp.backup(db.ftp);
 });
 xf.reg('ui:ftp-dec', (_, db) => {
     const cur = db.ftp ?? models.ftp.default;
-    const next = models.ftp.set(cur - 1);
+    const next = models.ftp.set(cur - 5);
     db.ftp = next;
     models.ftp.backup(db.ftp);
 });
