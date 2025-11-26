@@ -435,6 +435,15 @@ xf.reg('watch:stepIndex',     (index, db) => {
         xf.dispatch('ui:power-target-set', 0);
     }
 });
+// When FTP changes, recalculate power target for current step if workout is active
+xf.reg('db:ftp', (dbState, db) => {
+    if(exists(db.workout) && exists(db.intervalIndex) && exists(db.stepIndex)) {
+        const powerTarget = db.workout.intervals[db.intervalIndex].steps[db.stepIndex].power;
+        if(exists(powerTarget)) {
+            xf.dispatch('ui:power-target-set', models.ftp.toAbsolute(powerTarget, db.ftp));
+        }
+    }
+});
 xf.reg('workout:started', (x, db) => db.workoutStatus = 'started');
 xf.reg('workout:stopped', (x, db) => db.workoutStatus = 'stopped');
 xf.reg('workout:done',    (x, db) => db.workoutStatus = 'done');
