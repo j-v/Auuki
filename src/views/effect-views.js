@@ -22,6 +22,16 @@ class IntInput extends HTMLInputElement {
         if(!equals(value, this.state)) {
             this.state = value;
             this.render();
+            // Visual feedback: briefly flash input when value changes externally
+            try {
+                if(!this._ftpFlashInitialized) {
+                    this._ftpFlashInitialized = true;
+                }
+                this.classList.add('flash');
+                setTimeout(() => this.classList.remove('flash'), 450);
+            } catch (e) {
+                // ignore
+            }
         }
     }
     onChange(e) {
