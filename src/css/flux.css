@@ -1121,7 +1121,8 @@ auto-start-counter {
 #targets {
     font-size: 1rem;
     padding: 0 1em;
-    --inner-max-width: 300px;
+    --inner-max-width-single: 300px;
+    --inner-max-width-double: 600px;
     --mode-selector-font-size: 1em;
     --mode-selector-height: 3rem;
     --mode-selector-margin: 0.8em auto;
@@ -1140,7 +1141,20 @@ auto-start-counter {
 
 .targets--cont {
     margin: 0 auto;
-    max-width: var(--inner-max-width);
+    /* max-width: var(--inner-max-width); */
+}
+
+.targets--cont:has(#erg-mode-controls.active) {
+    max-width: var(--inner-max-width-double);
+}
+
+.targets--cont:has(#resistance-mode-controls.active),
+.targets--cont:has(#slope-mode-controls.active) {
+    max-width: var(--inner-max-width-single);
+}
+
+.mode-controls {
+    margin: 0 auto;
 }
 
 .mode-selector {
@@ -1149,7 +1163,7 @@ auto-start-counter {
     justify-content: space-evenly;
     align-items: center;
     position: relative;
-    max-width: 100%;
+    max-width: var(--inner-max-width-single);
     height: var(--mode-selector-height);
     margin: var(--mode-selector-margin);
     font-size: var(--mode-selector-font-size);
@@ -1214,7 +1228,7 @@ auto-start-counter {
 .erg-dual-controls {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     gap: 0.5rem;
 }
@@ -1223,7 +1237,6 @@ auto-start-counter {
     display: flex;
     flex-direction: row;
     align-items: center;
-    flex: 1;
     gap: 0.5rem;
 }
 
