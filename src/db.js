@@ -61,6 +61,8 @@ let db = {
 
     // Profile
     ftp: models.ftp.default,
+    ftpBias: models.ftpBias.default,
+    ftpControlMode: models.ftpControlMode.default,
     weight: models.weight.default,
     theme: models.theme.default,
     dockMode: models.dockMode.default,
@@ -298,6 +300,26 @@ xf.reg('ui:ftp-dec', (_, db) => {
     db.ftp = next;
     models.ftp.backup(db.ftp);
 });
+
+xf.reg('ui:ftp-bias-set', (bias, db) => {
+    db.ftpBias = models.ftpBias.set(bias);
+});
+xf.reg('ui:ftp-bias-inc', (_, db) => {
+    db.ftpBias = models.ftpBias.inc(db.ftpBias);
+});
+xf.reg('ui:ftp-bias-dec', (_, db) => {
+    db.ftpBias = models.ftpBias.dec(db.ftpBias);
+});
+
+xf.reg('ui:ftp-control-mode-set', (mode, db) => {
+    db.ftpControlMode = models.ftpControlMode.set(mode);
+    models.ftpControlMode.backup(db.ftpControlMode);
+});
+xf.reg('ui:ftp-control-mode-switch', (_, db) => {
+    db.ftpControlMode = models.ftpControlMode.switch(db.ftpControlMode);
+    models.ftpControlMode.backup(db.ftpControlMode);
+});
+
 xf.reg('ui:weight-set', (weight, db) => {
     db.weight = models.weight.set(weight);
     models.weight.backup(db.weight);
@@ -425,6 +447,7 @@ xf.reg('app:start', async function(_, db) {
     models.dockMode.apply(db.dockMode);
 
     db.ftp = models.ftp.set(models.ftp.restore());
+    db.ftpControlMode = models.ftpControlMode.set(models.ftpControlMode.restore());
     db.weight = models.weight.set(models.weight.restore());
     db.theme = models.theme.set(models.theme.restore());
     db.measurement = models.measurement.set(models.measurement.restore());

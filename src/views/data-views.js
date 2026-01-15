@@ -849,6 +849,68 @@ class FTPControl extends PowerTargetControl {
             set: 'ftp-set',
         };
         this.parse = parseInt;
+        // Bias defaults
+        this.biasProp = 'db:ftpBias';
+        this.biasEffects = {
+            inc: 'ftp-bias-inc',
+            dec: 'ftp-bias-dec',
+            set: 'ftp-bias-set',
+        };
+        this.controlMode = 'original';
+        this.bias = 100;
+        this.workoutStatus = 'stopped';
+    }
+    subs() {
+        super.subs();
+        xf.sub('db:ftpBias', this.onBiasUpdate.bind(this), this.signal);
+        xf.sub('db:ftpControlMode', this.onModeUpdate.bind(this), this.signal);
+        xf.sub('db:workoutStatus', this.onWorkoutStatus.bind(this), this.signal);
+    }
+    onBiasUpdate(bias) {
+        this.bias = bias;
+        this.render();
+    }
+    onModeUpdate(mode) {
+        this.controlMode = mode;
+        this.render();
+    }
+    onWorkoutStatus(status) {
+        this.workoutStatus = status;
+        this.render();
+    }
+    get isBiasMode() {
+         return equals(this.controlMode, 'bias') && equals(this.workoutStatus, 'started');
+    }
+    onInc(e) {
+        if (this.isBiasMode) {
+            xf.dispatch(`ui:${this.biasEffects.inc}`);
+        } else {
+            xf.dispatch(`ui:${this.effects.inc}`);
+        }
+    }
+    onDec(e) {
+        if (this.isBiasMode) {
+            xf.dispatch(`ui:${this.biasEffects.dec}`);
+        } else {
+            xf.dispatch(`ui:${this.effects.dec}`);
+        }
+    }
+    onChange(e) {
+        const val = this.parse(e.target.value);
+        if (this.isBiasMode) {
+             xf.dispatch(`ui:${this.biasEffects.set}`, val);
+        } else {
+             xf.dispatch(`ui:${this.effects.set}`, val);
+        }
+    }
+    render() {
+        if (this.isBiasMode) {
+            this.$input.type = 'text';
+            this.$input.value = `${this.bias}%`;
+        } else {
+            this.$input.type = 'number';
+            this.$input.value = this.transform(this.state);
+        }
     }
 }
 
@@ -1859,6 +1921,19 @@ class CompatibilityCheck extends HTMLElement {
 
 customElements.define('compatibility-check', CompatibilityCheck);
 
+class FTPControlModeValue extends DataView {
+    getDefaults() {
+        return {
+            prop: 'db:ftpControlMode',
+        };
+    }
+    transform(state) {
+        return equals(state, 'bias') ? 'Bias' : 'FTP';
+    }
+}
+
+customElements.define('ftp-control-mode-value', FTPControlModeValue);
+
 export {
     DataView,
 
@@ -1881,6 +1956,7 @@ export {
     MeasurementUnit,
     ThemeValue,
     MeasurementValue,
+    FTPControlModeValue,
 
     SlopeTarget,
     PowerTarget,

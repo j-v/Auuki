@@ -427,7 +427,12 @@ xf.reg('watch:stepIndex',     (index, db) => {
         xf.dispatch('ui:cadence-target-set', 0);
     }
     if(exists(powerTarget)) {
-        xf.dispatch('ui:power-target-set', models.ftp.toAbsolute(powerTarget, db.ftp));
+        let target = models.ftp.toAbsolute(powerTarget, db.ftp);
+        if(equals(db.ftpControlMode, 'bias')) {
+            target = Math.round(target * (db.ftpBias / 100));
+        }
+        xf.dispatch('ui:power-target-set', target);
+
         if(!exists(slopeTarget) && !equals(db.mode, ControlMode.erg)) {
             xf.dispatch('ui:mode-set', ControlMode.erg);
         }
@@ -440,10 +445,39 @@ xf.reg('db:ftp', (dbState, db) => {
     if(exists(db.workout) && exists(db.intervalIndex) && exists(db.stepIndex)) {
         const powerTarget = db.workout.intervals[db.intervalIndex].steps[db.stepIndex].power;
         if(exists(powerTarget)) {
-            xf.dispatch('ui:power-target-set', models.ftp.toAbsolute(powerTarget, db.ftp));
+            let target = models.ftp.toAbsolute(powerTarget, db.ftp);
+            if(equals(db.ftpControlMode, 'bias')) {
+                target = Math.round(target * (db.ftpBias / 100));
+            }
+            xf.dispatch('ui:power-target-set', target);
         }
     }
 });
+// When FTP Bias changes, recalculate power target
+xf.reg('db:ftpBias', (dbState, db) => {
+    if(exists(db.workout) && exists(db.intervalIndex) && exists(db.stepIndex) && equals(db.ftpControlMode, 'bias')) {
+        const powerTarget = db.workout.intervals[db.intervalIndex].steps[db.stepIndex].power;
+        if(exists(powerTarget)) {
+            let target = models.ftp.toAbsolute(powerTarget, db.ftp);
+            target = Math.round(target * (db.ftpBias / 100));
+            xf.dispatch('ui:power-target-set', target);
+        }
+    }
+});
+// When Control Mode changes, recalculate power target
+xf.reg('db:ftpControlMode', (dbState, db) => {
+    if(exists(db.workout) && exists(db.intervalIndex) && exists(db.stepIndex)) {
+        const powerTarget = db.workout.intervals[db.intervalIndex].steps[db.stepIndex].power;
+        if(exists(powerTarget)) {
+            let target = models.ftp.toAbsolute(powerTarget, db.ftp);
+            if(equals(db.ftpControlMode, 'bias')) {
+                target = Math.round(target * (db.ftpBias / 100));
+            }
+            xf.dispatch('ui:power-target-set', target);
+        }
+    }
+});
+
 xf.reg('workout:started', (x, db) => db.workoutStatus = 'started');
 xf.reg('workout:stopped', (x, db) => db.workoutStatus = 'stopped');
 xf.reg('workout:done',    (x, db) => db.workoutStatus = 'done');

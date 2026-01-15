@@ -425,6 +425,33 @@ class FTP extends Model {
     }
 }
 
+class FTPBias extends Target {
+    postInit(args = {}) {
+        this.min = existance(args.min, 1);
+        this.max = existance(args.max, 200);
+        this.step = existance(args.step, 1);
+    }
+    defaultValue() { return 100; }
+}
+
+class FTPControlMode extends Model {
+    postInit(args = {}) {
+        const self = this;
+        const storageModel = {
+            key: self.prop,
+            fallback: self.defaultValue(),
+        };
+        self.storage = new args.storage(storageModel);
+        self.values = ['original', 'bias'];
+    }
+    defaultValue() { return 'original'; }
+    defaultIsValid(value) { return this.values.includes(value); }
+    switch(mode) {
+        if(equals(mode, 'original')) return 'bias';
+        return 'original';
+    }
+}
+
 class Weight extends Model {
     postInit(args = {}) {
         const self = this;
@@ -1589,6 +1616,8 @@ const mode = new Mode({prop: 'mode'});
 const page = new Page({prop: 'page'});
 
 const ftp = new FTP({prop: 'ftp', storage: LocalStorageItem});
+const ftpBias = new FTPBias({prop: 'ftpBias'});
+const ftpControlMode = new FTPControlMode({prop: 'ftpControlMode', storage: LocalStorageItem});
 const weight = new Weight({prop: 'weight', storage: LocalStorageItem});
 const theme = new Theme({prop: 'theme', storage: LocalStorageItem});
 const dockMode = new DockMode({prop: 'dockMode', storage: LocalStorageItem});
@@ -1639,6 +1668,8 @@ let models = {
     mode,
     page,
     ftp,
+    ftpBias,
+    ftpControlMode,
     weight,
     dockMode,
     volume,
