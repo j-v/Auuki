@@ -1476,6 +1476,32 @@ class ViewAction extends HTMLElement {
 customElements.define('view-action', ViewAction);
 
 
+class ErgModeSwitcher extends HTMLElement {
+    connectedCallback() {
+        const self = this;
+        this.abortController = new AbortController();
+        this.signal = { signal: self.abortController.signal };
+
+        this.$w = this.querySelector('#erg-control-container-w');
+        this.$ftp = this.querySelector('#erg-control-container-ftp');
+
+        xf.sub('db:ftpControlMode', this.onUpdate.bind(this), this.signal);
+    }
+    disconnectedCallback() {
+        this.abortController.abort();
+    }
+    onUpdate(mode) {
+        if(equals(mode, 'bias')) {
+            this.$w.style.display = 'none';
+            this.$ftp.style.display = 'flex';
+        } else {
+            this.$w.style.display = 'flex';
+            this.$ftp.style.display = 'none';
+        }
+    }
+}
+customElements.define('erg-mode-switcher', ErgModeSwitcher);
+
 class BatteryLevel extends HTMLElement {
     constructor() {
         super();
@@ -1974,4 +2000,5 @@ export {
     NavigationStack,
     ViewAction,
     BatteryLevel,
+    ErgModeSwitcher,
 }

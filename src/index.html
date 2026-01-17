@@ -326,8 +326,8 @@
 
                                 <tab-group prop="mode">
                                     <div id="erg-mode-controls" class="tab active mode-controls" tab="erg">
-                                        <div class="erg-dual-controls">
-                                            <div class="control-with-label">
+                                        <erg-mode-switcher class="erg-dual-controls">
+                                            <div id="erg-control-container-w" class="control-with-label">
                                                 <div class="control-label">W</div>
                                                 <power-target-control id="power-control-btn" class="number-btn">
                                                     <div class="number-input">
@@ -343,7 +343,7 @@
                                                     </div>
                                                 </power-target-control>
                                             </div>
-                                            <div class="control-with-label">
+                                            <div id="erg-control-container-ftp" class="control-with-label">
                                                 <div class="control-label">FTP</div>
                                                 <ftp-control id="ftp-control-btn" class="number-btn">
                                                     <div class="number-input">
@@ -359,7 +359,7 @@
                                                     </div>
                                                 </ftp-control>
                                             </div>
-                                        </div>
+                                        </erg-mode-switcher>
                                     </div> <!-- end erg mode -->
                                     <div id="resistance-mode-controls" class="tab mode-controls" tab="resistance">
                                         <resistance-target-control id="resistance-control-btn" class="number-btn">
