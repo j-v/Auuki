@@ -1484,6 +1484,14 @@ class ErgModeSwitcher extends HTMLElement {
 
         this.$w = this.querySelector('#erg-control-container-w');
         this.$ftp = this.querySelector('#erg-control-container-ftp');
+        this.$wWrapper = this.$w.parentElement;
+        this.$ftpWrapper = this.$ftp.parentElement;
+        this.$wLabel = this.querySelector('#erg-control-w-label');
+        this.$ftpLabel = this.querySelector('#erg-control-ftp-label');
+
+        // Make labels clickable
+        this.$wLabel.addEventListener('pointerup', this.onToggle.bind(this), this.signal);
+        this.$ftpLabel.addEventListener('pointerup', this.onToggle.bind(this), this.signal);
 
         xf.sub('db:ftpControlMode', this.onUpdate.bind(this), this.signal);
     }
@@ -1492,12 +1500,15 @@ class ErgModeSwitcher extends HTMLElement {
     }
     onUpdate(mode) {
         if(equals(mode, 'bias')) {
-            this.$w.style.display = 'none';
-            this.$ftp.style.display = 'flex';
+            this.$wWrapper.style.display = 'none';
+            this.$ftpWrapper.style.display = 'flex';
         } else {
-            this.$w.style.display = 'flex';
-            this.$ftp.style.display = 'none';
+            this.$wWrapper.style.display = 'flex';
+            this.$ftpWrapper.style.display = 'none';
         }
+    }
+    onToggle() {
+        xf.dispatch('ui:ftp-control-mode-switch');
     }
 }
 customElements.define('erg-mode-switcher', ErgModeSwitcher);
