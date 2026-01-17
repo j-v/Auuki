@@ -1960,6 +1960,35 @@ class FTPControlModeValue extends DataView {
 
 customElements.define('ftp-control-mode-value', FTPControlModeValue);
 
+class FTPControlModeDefault extends DataView {
+    postInit() {
+        this.effect  = 'ui:ftp-control-mode-switch';
+        this.state   = 'original';
+    }
+    getDefaults() {
+        return {
+            prop: 'db:ftpControlMode',
+            effect: 'ui:ftp-control-mode-switch'
+        };
+    }
+    subs() {
+        xf.sub(`${this.prop}`, this.onUpdate.bind(this), this.signal);
+        this.addEventListener('pointerup', this.onEffect.bind(this), this.signal);
+    }
+    onUpdate(value) {
+        this.state = value;
+        this.render();
+    }
+    onEffect() {
+        xf.dispatch(`${this.effect}`);
+    }
+    render() {
+        this.textContent = equals(this.state, 'bias') ? 'ON' : 'OFF';
+    }
+}
+
+customElements.define('ftp-control-mode-default', FTPControlModeDefault);
+
 export {
     DataView,
 
