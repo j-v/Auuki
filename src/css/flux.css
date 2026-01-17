@@ -1248,18 +1248,81 @@ auto-start-counter {
 }
 
 .control-label {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: var(--gray);
-    text-transform: uppercase;
     position: absolute;
-    right: 100%;
-    margin-right: 1rem;
+    left: -4.5rem;
     white-space: nowrap;
+    width: 3rem;
+    text-align: center;
 }
 
 .external-label {
     cursor: pointer;
+    padding: 1rem 1.2rem;
+    border-radius: 0.8rem;
+    transition: all 0.2s ease;
+    background-color: var(--background-alt);
+    border: 2px solid var(--border);
+    min-width: 4rem;
+    min-height: 3rem;
+    text-align: center;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    /* Ensure minimum touch target size (44px iOS recommendation) */
+    touch-action: manipulation;
+    line-height: 1;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--gray);
+    text-transform: uppercase;
+}
+
+.external-label::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 1rem;
+    background: transparent;
+    transition: background-color 0.2s ease;
+}
+
+.external-label:hover {
+    background-color: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    border-color: var(--primary);
+}
+
+.external-label:active {
+    transform: translateY(0px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    background-color: var(--primary-dark);
+}
+
+/* Touch-specific styles */
+@media (hover: none) and (pointer: coarse) {
+    .external-label {
+        padding: 1.2rem 1.4rem;
+        min-height: 3.5rem;
+        min-width: 4.5rem;
+        border-width: 3px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .external-label:active {
+        background-color: var(--primary);
+        color: white;
+        transform: scale(0.95);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
 }
 
 #erg-control-container-ftp {
