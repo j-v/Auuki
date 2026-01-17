@@ -1954,7 +1954,7 @@ class FTPControlModeValue extends DataView {
         };
     }
     transform(state) {
-        return equals(state, 'bias') ? 'Bias' : 'FTP';
+        return equals(state, 'bias') ? 'FTP Bias' : 'Power Target';
     }
 }
 
