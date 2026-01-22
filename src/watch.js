@@ -51,9 +51,17 @@ class Watch {
 
             if(self.isWorkoutDone()) {
                 xf.dispatch('watch:lap');
+                
                 // reset to slope mode 0% when workout is done
                 xf.dispatch('ui:slope-target-set', 0);
                 xf.dispatch('ui:mode-set', ControlMode.sim);
+
+                // Lock ERG control in 'power target' (W) mode
+                xf.dispatch('ui:ftp-control-mode-set', 'original');
+                
+                // Disable 'ftp bias' mode
+                xf.dispatch('ui:ftp-bias-disabled-set', true);
+
                 console.log(`Workout done!`);
             }
         });
@@ -158,6 +166,9 @@ class Watch {
     }
     startWorkout() {
         const self = this;
+
+        // Reset FTP Bias disabled state
+        xf.dispatch('ui:ftp-bias-disabled-set', false);
 
         // in case of pressing play button during auto start countdown
         this.autoStartCounter = -1;

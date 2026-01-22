@@ -1482,6 +1482,8 @@ class ErgModeSwitcher extends HTMLElement {
         this.abortController = new AbortController();
         this.signal = { signal: self.abortController.signal };
 
+        this.disabled = false;
+
         this.$w = this.querySelector('#erg-control-container-w');
         this.$ftp = this.querySelector('#erg-control-container-ftp');
         this.$wWrapper = this.$w.parentElement;
@@ -1494,9 +1496,22 @@ class ErgModeSwitcher extends HTMLElement {
         this.$ftpLabel.addEventListener('pointerup', this.onToggle.bind(this), this.signal);
 
         xf.sub('db:ftpControlMode', this.onUpdate.bind(this), this.signal);
+        xf.sub('db:ftpBiasDisabled', this.onDisabledUpdate.bind(this), this.signal);
     }
     disconnectedCallback() {
         this.abortController.abort();
+    }
+    onDisabledUpdate(disabled) {
+        this.disabled = disabled;
+        if (disabled) {
+            this.classList.add('disabled');
+            this.style.opacity = '0.5';
+            this.style.pointerEvents = 'none';
+        } else {
+            this.classList.remove('disabled');
+            this.style.opacity = '1';
+            this.style.pointerEvents = 'auto';
+        }
     }
     onUpdate(mode) {
         if(equals(mode, 'bias')) {
@@ -1508,6 +1523,7 @@ class ErgModeSwitcher extends HTMLElement {
         }
     }
     onToggle() {
+        if(this.disabled) return;
         xf.dispatch('ui:ftp-control-mode-switch');
     }
 }

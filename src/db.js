@@ -63,6 +63,7 @@ let db = {
     ftp: models.ftp.default,
     ftpBias: models.ftpBias.default,
     ftpControlMode: models.ftpControlMode.default,
+    ftpBiasDisabled: false,
     weight: models.weight.default,
     theme: models.theme.default,
     dockMode: models.dockMode.default,
@@ -318,6 +319,10 @@ xf.reg('ui:ftp-control-mode-set', (mode, db) => {
 xf.reg('ui:ftp-control-mode-switch', (_, db) => {
     db.ftpControlMode = models.ftpControlMode.switch(db.ftpControlMode);
     models.ftpControlMode.backup(db.ftpControlMode);
+});
+
+xf.reg('ui:ftp-bias-disabled-set', (value, db) => {
+    db.ftpBiasDisabled = value;
 });
 
 xf.reg('ui:weight-set', (weight, db) => {
