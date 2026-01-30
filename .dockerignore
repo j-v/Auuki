@@ -1,0 +1,16 @@
+node_modules
+.parcel-cache
+dist
+.git
+.github
+dev_cert
+.babelrc
+.htmlnanorc
+jest.config.js
+package-lock.json
+README.md
+LICENSE.txt
+test
+doc
+sitemap.xml
+robots.txt
