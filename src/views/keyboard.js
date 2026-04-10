@@ -1,4 +1,4 @@
-import { xf, exists } from '../functions.js';
+import { xf, exists, equals } from '../functions.js';
 import { ControlMode, } from '../ble/enums.js';
 
 function Keyboard() {
@@ -68,13 +68,20 @@ function KeyboardControls() {
     let mode = ControlMode.erg;
     xf.sub('db:mode', x => mode = x);
 
+    let ftpControlMode = 'original';
+    xf.sub('db:ftpControlMode', x => ftpControlMode = x);
+
     let watchStatus = 'stopped';
     xf.sub('db:watchStatus', x => watchStatus = x);
 
     // Modes Inc/Dec
     xf.sub('key:up', e => {
         if(mode === ControlMode.erg) {
-            xf.dispatch('ui:power-target-inc');
+            if(equals(ftpControlMode, 'bias')) {
+                xf.dispatch('ui:ftp-bias-inc');
+            } else {
+                xf.dispatch('ui:power-target-inc');
+            }
         }
         if(mode === ControlMode.resistance) {
             xf.dispatch('ui:resistance-target-inc');
@@ -85,7 +92,11 @@ function KeyboardControls() {
     });
     xf.sub('key:down', e => {
         if(mode === ControlMode.erg) {
-            xf.dispatch('ui:power-target-dec');
+            if(equals(ftpControlMode, 'bias')) {
+                xf.dispatch('ui:ftp-bias-dec');
+            } else {
+                xf.dispatch('ui:power-target-dec');
+            }
         }
         if(mode === ControlMode.resistance) {
             xf.dispatch('ui:resistance-target-dec');
